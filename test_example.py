@@ -83,4 +83,60 @@ def test_search_functionality(page: Page):
     expect(page).to_have_url(f"https://playwright.dev/docs/intro")
 
 
+def test_navigation_menu_functionality(page: Page):
+    """
+    Tests navigation through the main menu items on the Playwright documentation site.
+    """
+    menu_items = [
+        ("API", "https://playwright.dev/docs/api/class-playwright"),
+        ("Trace Viewer", "https://playwright.dev/docs/trace-viewer"),
+        ("Test Generator", "https://playwright.dev/docs/codegen")
+    ]
+
+    # 1. Navigate to the main documentation page
+    page.goto("https://playwright.dev/docs/intro")
+    
+    # 2. Assert that we're on the correct initial page
+    expect(page).to_have_url("https://playwright.dev/docs/intro")
+    assert "Playwright" in page.title()
+
+    # 3. Test navigation for each menu item
+    for menu_text, expected_url_pattern in menu_items:
+        # Find and click the navigation link using more specific selectors
+        if menu_text == "API":
+            # Use the first API link in the navbar (main API section)
+            nav_link = page.locator('a[href="/docs/api/class-playwright"]').first
+        elif menu_text == "Trace Viewer":
+            # Look for Trace Viewer in the navigation
+            nav_link = page.get_by_text("Trace Viewer").first
+        elif menu_text == "Test Generator":
+            # Look for Test Generator in the navigation
+            nav_link = page.get_by_text("Test Generator").first
+        else:
+            # Fallback to role-based selector
+            nav_link = page.get_by_role("link", name=menu_text).first
+        
+        # Assert the link is visible and clickable
+        expect(nav_link).to_be_visible()
+        nav_link.click()
+        
+        # Wait for navigation to complete
+        page.wait_for_load_state("networkidle")
+        
+        # Assert that we navigated to a page containing the expected URL pattern
+        current_url = page.url
+        assert expected_url_pattern in current_url, f"Expected URL to contain '{expected_url_pattern}', but got '{current_url}'"
+        
+        # Assert that the page title contains relevant keywords
+        page_title = page.title()
+        assert menu_text.lower() in page_title.lower() or "playwright" in page_title.lower(), \
+            f"Expected page title to contain '{menu_text}' or 'playwright', but got '{page_title}'"
+        
+        # Assert that the main content area is visible
+        main_content = page.get_by_role("main").first
+        expect(main_content).to_be_visible()
+        
+        # Navigate back to the intro page for the next test
+        page.goto("https://playwright.dev/docs/intro")
+
 
