@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:assured": "playwright test tests/assured_interview.spec.ts",
+    "test:assured:headed": "playwright test tests/assured_interview.spec.ts --headed --project=chromium",
+    "report": "playwright show-report"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
